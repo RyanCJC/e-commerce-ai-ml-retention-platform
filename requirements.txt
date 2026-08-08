@@ -15,6 +15,7 @@ plotly
 # -----------------------------
 # Machine Learning
 # -----------------------------
+mlflow
 scikit-learn
 lightgbm
 catboost
