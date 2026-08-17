@@ -1,5 +1,7 @@
 from pathlib import Path
 import joblib
+from llm.schemas import RetentionRecommendation
+from llm.llm_graph import graph, analyze_customer
 
 import pandas as pd
 
@@ -74,6 +76,17 @@ class CustomerInput(BaseModel):
     latitude: float
     longitude: float
 
+class FeatureContribution(BaseModel):
+    feature: str
+    shap_value: float
+    direction: str
+
+class PredictionResponse(BaseModel):
+    churn_prediction: int
+    churn_probability: float
+    risk_level: str
+    feature_contributions: list[FeatureContribution]
+    recommendation: RetentionRecommendation
 
 # ============================================================
 # HEALTH CHECK
@@ -104,33 +117,23 @@ def root():
 # ============================================================
 # PREDICTION ENDPOINT
 # ============================================================
+@app.post("/analyze")
+def analyze(customer: CustomerInput):
 
-@app.post("/predict")
-def predict(customer: CustomerInput):
     try:
+
         customer_data = customer.model_dump()
-        input_data = pd.DataFrame([customer_data])
 
-        prediction = int(model.predict(input_data)[0])
-        churn_probability = float(model.predict_proba(input_data)[0, 1])
+        result = analyze_customer(
+            customer_data=customer_data,
+            message="Explain this customer's churn risk and suggest retention actions."
+        )
 
-        if churn_probability >= 0.70:
-            risk_level = "High Churn Risk"
-        elif churn_probability >= 0.40:
-            risk_level = "Medium Churn Risk"
-        else:
-            risk_level = "Low Churn Risk"
-
-        return {
-            "churn_prediction": prediction,
-            "churn_probability": round(churn_probability, 4),
-            "risk_level": risk_level,
-            # "model": MODEL_NAME,
-            # "model_version": MODEL_VERSION
-        }
+        return result
 
     except Exception as e:
+
         raise HTTPException(
             status_code=500,
-            detail=f"Prediction failed: {str(e)}"
+            detail=f"Analysis failed: {str(e)}"
         )
