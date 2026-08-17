@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from src.inference.predictor import predict_churn, explain_churn
 from llm.schemas import RetentionRecommendation
-
+from rag.rag_pipeline import retrieve_customer_retention_knowledge
 from typing import TypedDict
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import START, END, StateGraph
@@ -14,11 +14,12 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 class GraphState(TypedDict):
     message: str
-    customer_data: dict
+    customer_data: dict | None
     churn_prediction: int | None
     churn_probability: float | None
     risk_level: str | None
     feature_contributions: list[dict] | None
+    rag_context: str | None
     response: RetentionRecommendation | None
 
 
@@ -84,16 +85,23 @@ def high_risk_recommendation(state: GraphState):
         SHAP model explanation:
         {state["feature_contributions"]}
 
+        Retrieved retention knowledge:
+        {state["rag_context"]}
+
         User request:
         {state["message"]}
 
         Your task:
 
-        1. Explain why the model identifies this customer as high risk.
-        2. Identify the most important model-attributed risk factors.
-        3. Recommend practical and prioritized retention actions.
-        4. Focus on proactive intervention because this customer has high
-        predicted churn risk.
+        1. Explain why the customer currently appears to have high churn risk.
+        2. Identify the most important factors influencing the model prediction.
+        3. Use the retrieved retention knowledge to inform practical and
+        prioritized retention actions.
+        4. Focus on proactive intervention and reducing the customer's
+        likelihood of churning.
+        5. Prioritize actions that directly address the most relevant
+        model-attributed risk factors where appropriate.
+        6. Adapt the retrieved strategies to this specific customer.
 
         Important rules:
 
@@ -102,7 +110,13 @@ def high_risk_recommendation(state: GraphState):
         - SHAP values represent model attribution, not causation.
         - Do not claim that a feature caused churn.
         - Do not invent customer behavior, complaints, or interactions.
-        - Base your explanation on the supplied customer data and model output.
+        - Do not present retrieved knowledge as if it were customer-specific evidence.
+        - Use retrieved knowledge as general evidence for selecting retention strategies.
+        - Base customer-specific claims only on the supplied customer data,
+        ML prediction, and SHAP explanation.
+        - Do not assume that every retrieved retention strategy is appropriate
+        for this specific customer.
+        - Prioritize practical, targeted interventions over generic recommendations.
         """
 
     response = structured_llm.invoke(prompt)
@@ -130,6 +144,9 @@ def medium_risk_recommendation(state: GraphState):
         SHAP model explanation:
         {state["feature_contributions"]}
 
+        Retrieved retention knowledge:
+        {state["rag_context"]}
+
         User request:
         {state["message"]}
 
@@ -137,9 +154,11 @@ def medium_risk_recommendation(state: GraphState):
 
         1. Explain the customer's moderate churn risk.
         2. Identify the most important factors influencing the model prediction.
-        3. Recommend preventive retention actions.
-        4. Focus on increasing engagement and addressing potential weaknesses
-        before the customer becomes high risk.
+        3. Use the retrieved retention knowledge to inform practical
+        preventive retention actions.
+        4. Focus on increasing engagement and addressing potential
+        weaknesses before the customer becomes high risk.
+        5. Adapt the retrieved strategies to this specific customer.
 
         Important rules:
 
@@ -148,8 +167,11 @@ def medium_risk_recommendation(state: GraphState):
         - SHAP values represent model attribution, not causation.
         - Do not claim that a feature caused churn.
         - Do not invent customer behavior, complaints, or interactions.
-        - Base your explanation on the supplied customer data and model output.
-        """
+        - Do not present retrieved knowledge as if it were customer-specific evidence.
+        - Use retrieved knowledge as general evidence for selecting retention strategies.
+        - Base customer-specific claims only on the supplied customer data,
+        ML prediction, and SHAP explanation.
+    """
 
     response = structured_llm.invoke(prompt)
 
@@ -175,15 +197,23 @@ def low_risk_recommendation(state: GraphState):
         SHAP model explanation:
         {state["feature_contributions"]}
 
+        Retrieved retention knowledge:
+        {state["rag_context"]}
+
         User request:
         {state["message"]}
 
         Your task:
 
         1. Explain why the customer currently appears to have low churn risk.
-        2. Identify the most relevant model-attributed factors.
-        3. Recommend lightweight engagement or loyalty actions.
-        4. Avoid unnecessarily aggressive retention interventions.
+        2. Identify the most important factors influencing the model prediction.
+        3. Use the retrieved retention knowledge to inform appropriate
+        lightweight engagement and loyalty strategies.
+        4. Focus on maintaining the existing customer relationship and
+        preventing unnecessary deterioration.
+        5. Recommend low-cost, non-aggressive interventions rather than
+        intensive retention campaigns.
+        6. Adapt the retrieved strategies to this specific customer.
 
         Important rules:
 
@@ -192,8 +222,13 @@ def low_risk_recommendation(state: GraphState):
         - SHAP values represent model attribution, not causation.
         - Do not claim that a feature caused churn.
         - Do not invent customer behavior, complaints, or interactions.
-        - Base your explanation on the supplied customer data and model output.
-        """
+        - Do not present retrieved knowledge as if it were customer-specific evidence.
+        - Use retrieved knowledge as general evidence for selecting retention strategies.
+        - Base customer-specific claims only on the supplied customer data,
+        ML prediction, and SHAP explanation.
+        - Do not recommend aggressive interventions when the available evidence
+        indicates low churn risk.
+    """
 
     response = structured_llm.invoke(prompt)
 
@@ -201,7 +236,98 @@ def low_risk_recommendation(state: GraphState):
         "response": response
     }
 
+def high_risk_rag(state: GraphState):
 
+    documents = retrieve_customer_retention_knowledge(
+        customer_data=state["customer_data"],
+        churn_probability=state["churn_probability"],
+        risk_level=state["risk_level"],
+        feature_contributions=state["feature_contributions"],
+        strategy_focus="""
+        Focus on high-risk customer retention strategies,
+        including:
+
+        - customer win-back strategies
+        - customer reactivation
+        - targeted retention interventions
+        - service recovery
+        - personalized incentives
+        - reducing immediate churn risk
+        - preventing customer defection
+        """,
+        k=4
+    )
+
+    rag_context = "\n\n".join(
+        document.page_content
+        for document in documents
+    )
+
+    return {
+        "rag_context": rag_context
+    }
+
+def medium_risk_rag(state: GraphState):
+
+    documents = retrieve_customer_retention_knowledge(
+        customer_data=state["customer_data"],
+        churn_probability=state["churn_probability"],
+        risk_level=state["risk_level"],
+        feature_contributions=state["feature_contributions"],
+        strategy_focus="""
+        Focus on medium-risk customer retention strategies,
+        including:
+
+        - increasing customer engagement
+        - encouraging repeat purchases
+        - improving customer satisfaction
+        - customer loyalty development
+        - personalized recommendations
+        - preventive retention strategies
+        - increasing purchase frequency
+        """,
+        k=4
+    )
+
+    rag_context = "\n\n".join(
+        document.page_content
+        for document in documents
+    )
+
+    return {
+        "rag_context": rag_context
+    }
+
+def low_risk_rag(state: GraphState):
+
+    documents = retrieve_customer_retention_knowledge(
+        customer_data=state["customer_data"],
+        churn_probability=state["churn_probability"],
+        risk_level=state["risk_level"],
+        feature_contributions=state["feature_contributions"],
+        strategy_focus="""
+        Focus on low-risk customer retention strategies,
+        including:
+
+        - customer loyalty
+        - repeat purchase encouragement
+        - customer advocacy
+        - cross-selling and product discovery
+        - maintaining customer satisfaction
+        - loyalty programs
+        - strengthening long-term customer relationships
+        """,
+        k=4
+    )
+
+    rag_context = "\n\n".join(
+        document.page_content
+        for document in documents
+    )
+
+    return {
+        "rag_context": rag_context
+    }
 
 graph_builder = StateGraph(GraphState)
 
@@ -213,6 +339,21 @@ graph_builder.add_node(
 graph_builder.add_node(
     "explain_prediction",
     explain_prediction
+)
+
+graph_builder.add_node(
+    "high_risk_rag",
+    high_risk_rag
+)
+
+graph_builder.add_node(
+    "medium_risk_rag",
+    medium_risk_rag
+)
+
+graph_builder.add_node(
+    "low_risk_rag",
+    low_risk_rag
 )
 
 graph_builder.add_node(
@@ -245,10 +386,25 @@ graph_builder.add_conditional_edges(
     "explain_prediction",
     route_by_risk,
     {
-        "high_risk": "high_risk_recommendation",
-        "medium_risk": "medium_risk_recommendation",
-        "low_risk": "low_risk_recommendation"
+        "high_risk": "high_risk_rag",
+        "medium_risk": "medium_risk_rag",
+        "low_risk": "low_risk_rag"
     }
+)
+
+graph_builder.add_edge(
+    "high_risk_rag",
+    "high_risk_recommendation"
+)
+
+graph_builder.add_edge(
+    "medium_risk_rag",
+    "medium_risk_recommendation"
+)
+
+graph_builder.add_edge(
+    "low_risk_rag",
+    "low_risk_recommendation"
 )
 
 graph_builder.add_edge(
@@ -268,10 +424,10 @@ graph_builder.add_edge(
 
 graph = graph_builder.compile()
 
-# png_bytes = graph.get_graph().draw_mermaid_png()
+png_bytes = graph.get_graph().draw_mermaid_png()
 
-# with open("langgraph_workflow.png", "wb") as f:
-#     f.write(png_bytes)
+with open("langgraph_workflow.png", "wb") as f:
+    f.write(png_bytes)
 
 def analyze_customer(
     customer_data: dict,
@@ -280,12 +436,20 @@ def analyze_customer(
 
     result = graph.invoke(
         {
-            "message": message,
+            "message": (
+                "Explain this customer's churn risk "
+                "and suggest practical retention actions."
+            ),
+
             "customer_data": customer_data,
+
             "churn_prediction": None,
             "churn_probability": None,
             "risk_level": None,
+
             "feature_contributions": None,
+            "rag_context": None,
+
             "response": None
         }
     )
@@ -295,5 +459,6 @@ def analyze_customer(
         "churn_probability": result["churn_probability"],
         "risk_level": result["risk_level"],
         "feature_contributions": result["feature_contributions"],
+        #"rag_context": result["rag_context"],
         "recommendation": result["response"]
     }

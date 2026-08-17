@@ -18,9 +18,7 @@ from langchain_chroma import Chroma
 
 DOCUMENT_DIR = Path(__file__).parent / "documents"
 
-VECTOR_DB_DIR = (
-    Path(__file__).parent / "chroma_db"
-)
+VECTOR_DB_DIR = Path(__file__).parent / "chroma_db"
 
 
 def load_documents():
@@ -83,23 +81,10 @@ def create_vector_store(chunks):
 if __name__ == "__main__":
 
     documents = load_documents()
+    print(f"Loaded {len(documents)} document pages.")
 
-    print(
-        f"Loaded {len(documents)} document pages."
-    )
+    chunks = split_documents(documents)
+    print(f"Created {len(chunks)} chunks.")
 
-    chunks = split_documents(
-        documents
-    )
-
-    print(
-        f"Created {len(chunks)} chunks."
-    )
-
-    vector_store = create_vector_store(
-        chunks
-    )
-
-    print(
-        "Vector database created successfully."
-    )
+    vector_store = create_vector_store(chunks)
+    print("Vector database created successfully.")

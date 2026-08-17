@@ -7,9 +7,7 @@ from langchain_huggingface import (
 from langchain_chroma import Chroma
 
 
-VECTOR_DB_DIR = (
-    Path(__file__).parent / "chroma_db"
-)
+VECTOR_DB_DIR = Path(__file__).parent / "chroma_db"
 
 
 embeddings = HuggingFaceEmbeddings(
@@ -23,18 +21,39 @@ vector_store = Chroma(
 )
 
 
-retriever = vector_store.as_retriever(
-    search_kwargs={
-        "k": 4
-    }
-)
-
 def retrieve_retention_knowledge(
-    query: str
+    query: str,
+    k: int = 4
 ):
-
-    documents = retriever.invoke(
-        query
+    results = vector_store.similarity_search(
+        query,
+        k=k
     )
 
-    return documents
+    return results
+
+
+if __name__ == "__main__":
+
+    query = """
+    Customer retention strategies for an e-commerce customer
+    with moderate churn risk, low purchase frequency,
+    and relatively low customer satisfaction.
+    Focus on increasing repeat purchases and customer engagement.
+    """
+
+    results = retrieve_retention_knowledge(
+        query,
+        k=4
+    )
+
+    for i, result in enumerate(results, start=1):
+
+        print("\n====================")
+        print(f"RESULT {i}")
+        print("====================")
+
+        print(result.page_content)
+
+        print("\nMetadata:")
+        print(result.metadata)
