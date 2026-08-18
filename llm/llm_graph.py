@@ -424,10 +424,10 @@ graph_builder.add_edge(
 
 graph = graph_builder.compile()
 
-png_bytes = graph.get_graph().draw_mermaid_png()
+# png_bytes = graph.get_graph().draw_mermaid_png()
 
-with open("langgraph_workflow.png", "wb") as f:
-    f.write(png_bytes)
+# with open("langgraph_workflow.png", "wb") as f:
+#     f.write(png_bytes)
 
 def analyze_customer(
     customer_data: dict,
@@ -436,11 +436,7 @@ def analyze_customer(
 
     result = graph.invoke(
         {
-            "message": (
-                "Explain this customer's churn risk "
-                "and suggest practical retention actions."
-            ),
-
+            "message": message,
             "customer_data": customer_data,
 
             "churn_prediction": None,

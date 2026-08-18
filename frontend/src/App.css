@@ -1,0 +1,738 @@
+/* ================================
+   Global
+================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  background: #f5f7fb;
+  color: #172033;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+
+/* ================================
+   App Navigation
+================================ */
+
+.app {
+  min-height: 100vh;
+}
+
+.navbar {
+  height: 68px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 40px;
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-button {
+  border: none;
+  background: transparent;
+
+  padding: 10px 16px;
+  border-radius: 8px;
+
+  color: #6b7280;
+  font-weight: 500;
+
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.nav-button:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.nav-button.active {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+
+/* ================================
+   Page Layout
+================================ */
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+
+  padding: 40px;
+}
+
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px;
+
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.page-header p {
+  margin: 0;
+
+  color: #6b7280;
+  font-size: 15px;
+}
+
+
+/* ================================
+   Cards
+================================ */
+
+.card {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  padding: 24px;
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.card-title {
+  margin: 0 0 6px;
+
+  font-size: 17px;
+  font-weight: 650;
+
+  color: #111827;
+}
+
+.card-description {
+  margin: 0 0 20px;
+
+  color: #6b7280;
+  font-size: 14px;
+}
+
+
+/* ================================
+   Dashboard Overview
+================================ */
+
+.overview-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 20px;
+
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  padding: 22px;
+}
+
+.metric-label {
+  color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  margin-bottom: 10px;
+}
+
+.metric-value {
+  color: #111827;
+
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.metric-subtitle {
+  margin-top: 6px;
+
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+
+/* ================================
+   Dashboard Grid
+================================ */
+
+.dashboard-grid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  gap: 24px;
+
+  margin-bottom: 24px;
+}
+
+
+/* ================================
+   Risk Distribution
+================================ */
+
+.risk-summary {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 12px;
+
+  margin-top: 20px;
+}
+
+.risk-item {
+  padding: 14px;
+
+  border-radius: 8px;
+
+  background: #f9fafb;
+
+  text-align: center;
+}
+
+.risk-item-label {
+  color: #6b7280;
+
+  font-size: 13px;
+}
+
+.risk-item-value {
+  margin-top: 5px;
+
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.risk-low {
+  color: #16a34a;
+}
+
+.risk-medium {
+  color: #d97706;
+}
+
+.risk-high {
+  color: #dc2626;
+}
+
+
+/* ================================
+   Risk Segment
+================================ */
+
+.segment-table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.segment-table th {
+  text-align: left;
+
+  padding: 12px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  color: #6b7280;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.segment-table td {
+  padding: 14px 12px;
+
+  border-bottom: 1px solid #f1f3f5;
+
+  font-size: 14px;
+}
+
+.segment-table tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* ================================
+   Model Attribution
+================================ */
+
+.attribution-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.attribution-row {
+  display: grid;
+
+  grid-template-columns:
+    minmax(180px, 1fr)
+    120px
+    80px;
+
+  align-items: center;
+
+  gap: 16px;
+}
+
+.attribution-feature {
+  font-size: 14px;
+  color: #374151;
+}
+
+.attribution-bar-container {
+  height: 8px;
+
+  background: #e5e7eb;
+
+  border-radius: 999px;
+
+  overflow: hidden;
+}
+
+.attribution-bar {
+  height: 100%;
+
+  border-radius: 999px;
+
+  background: #6366f1;
+}
+
+.attribution-value {
+  text-align: right;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.attribution-positive {
+  color: #dc2626;
+}
+
+.attribution-negative {
+  color: #16a34a;
+}
+
+.interpretation-note {
+  margin-top: 20px;
+
+  padding: 14px 16px;
+
+  background: #f8fafc;
+
+  border-left: 3px solid #94a3b8;
+
+  border-radius: 4px;
+
+  color: #64748b;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+
+/* ================================
+   Customer Analysis
+================================ */
+
+.analysis-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(400px, 0.9fr)
+    minmax(500px, 1.1fr);
+
+  gap: 24px;
+
+  align-items: start;
+}
+
+
+/* ================================
+   Form
+================================ */
+
+.customer-form {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #374151;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #111827;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: #6366f1;
+
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.analyze-button {
+  grid-column: 1 / -1;
+
+  margin-top: 8px;
+
+  padding: 12px 18px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #4f46e5;
+  color: #ffffff;
+
+  font-weight: 600;
+
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+.analyze-button:hover {
+  background: #4338ca;
+}
+
+.analyze-button:active {
+  transform: translateY(1px);
+}
+
+.analyze-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* ================================
+   Prediction Result
+================================ */
+
+.prediction-card {
+  margin-bottom: 24px;
+}
+
+.prediction-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 24px;
+}
+
+.risk-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.risk-badge.low {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.risk-badge.medium {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.risk-badge.high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.prediction-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 16px;
+}
+
+.prediction-metric {
+  padding: 16px;
+
+  background: #f9fafb;
+
+  border-radius: 8px;
+}
+
+.prediction-metric-label {
+  color: #6b7280;
+
+  font-size: 12px;
+
+  margin-bottom: 7px;
+}
+
+.prediction-metric-value {
+  color: #111827;
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
+/* ================================
+   Probability
+================================ */
+
+.probability-container {
+  margin-top: 20px;
+}
+
+.probability-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-bottom: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.probability-bar {
+  width: 100%;
+  height: 10px;
+
+  background: #e5e7eb;
+
+  border-radius: 999px;
+
+  overflow: hidden;
+}
+
+.probability-fill {
+  height: 100%;
+
+  background: #6366f1;
+
+  border-radius: 999px;
+
+  transition: width 0.4s ease;
+}
+
+
+/* ================================
+   Recommendation
+================================ */
+
+.recommendation {
+  line-height: 1.7;
+
+  color: #374151;
+
+  font-size: 14px;
+}
+
+.recommendation-section {
+  margin-top: 20px;
+}
+
+.recommendation-section h3 {
+  margin: 0 0 8px;
+
+  font-size: 15px;
+
+  color: #111827;
+}
+
+.recommendation-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.recommendation-list li {
+  margin-bottom: 8px;
+}
+
+
+/* ================================
+   Loading / Error
+================================ */
+
+.loading {
+  min-height: 300px;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  color: #6b7280;
+}
+
+.error-message {
+  padding: 16px;
+
+  border-radius: 8px;
+
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+
+  color: #b91c1c;
+
+  font-size: 14px;
+}
+
+
+/* ================================
+   Responsive
+================================ */
+
+@media (max-width: 1000px) {
+
+  .analysis-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .navbar {
+    padding: 0 20px;
+  }
+
+  .page {
+    padding: 24px 20px;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-form {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full-width {
+    grid-column: auto;
+  }
+
+  .analyze-button {
+    grid-column: auto;
+  }
+
+  .prediction-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attribution-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .attribution-value {
+    text-align: left;
+  }
+
+}

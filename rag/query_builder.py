@@ -32,8 +32,7 @@ def build_retention_query(
     Important model-attributed factors:
     {feature_text}
 
-    Focus specifically on:
-
+    Focus on this strategy focus:
     {strategy_focus}
 
     Retrieve practical, evidence-based retention strategies
