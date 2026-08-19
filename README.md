@@ -1,4 +1,4 @@
-# E-Commerce AI-ML Customer Retention Platform
+# E-Commerce AI/ML-Based Customer Retention & Churn Analytics Platform
 
 An AI-powered customer retention platform that combines **machine learning churn prediction**, **SHAP explainability**, **risk-based agentic workflows**, **Retrieval-Augmented Generation (RAG)**, and **Supabase** to generate evidence-based customer retention recommendations.
 
