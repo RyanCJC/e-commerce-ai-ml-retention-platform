@@ -17,9 +17,14 @@ function App() {
         </button>
       </nav>
 
+      {/* Mounted only while visible, so it refetches fresh analytics each time
+          (new customer analyses are saved to the database). */}
       {page === "dashboard" && <Dashboard />}
 
-      {page === "customer" && <CustomerAnalysis />}
+      {/* Always mounted, just hidden, so the form and results survive tab switches. */}
+      <div style={{ display: page === "customer" ? "block" : "none" }}>
+        <CustomerAnalysis />
+      </div>
     </div>
   );
 }

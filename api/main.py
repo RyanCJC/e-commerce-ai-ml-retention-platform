@@ -205,13 +205,10 @@ def analyze(customer: CustomerInput):
     response_model=AnalyticsResponse
 )
 def analytics():
-
     try:
-
         return get_dashboard_analytics()
-
     except Exception as e:
-
+        traceback.print_exc()
         raise HTTPException(
             status_code=500,
             detail=f"Analytics failed: {str(e)}"

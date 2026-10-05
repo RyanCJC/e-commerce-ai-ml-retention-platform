@@ -14,66 +14,147 @@ import {
   Cell,
 } from "recharts";
 
-function CustomerAnalysis() {
-  const [form, setForm] = useState<CustomerInput>({
-    frequency: 2,
-    monetary: 250,
-    avg_order_value: 125,
-    unique_categories: 2,
-    unique_sellers: 2,
-    avg_review_score: 3.5,
-    late_delivery_ratio: 0.3,
-    avg_installments: 0,
-    max_installments: 0,
-    payment_method_count: 0,
-    preferred_payment_type: "credit_card",
-    state: "",
-    latitude: 0,
-    longitude: 0,
-  });
+/* -------------------------------- */
+/* CONSTANTS (outside the component */
+/* so they are created only once)   */
+/* -------------------------------- */
 
+const BRAZILIAN_STATES = [
+  { code: "AC", name: "Acre" },
+  { code: "AL", name: "Alagoas" },
+  { code: "AP", name: "Amapá" },
+  { code: "AM", name: "Amazonas" },
+  { code: "BA", name: "Bahia" },
+  { code: "CE", name: "Ceará" },
+  { code: "DF", name: "Distrito Federal" },
+  { code: "ES", name: "Espírito Santo" },
+  { code: "GO", name: "Goiás" },
+  { code: "MA", name: "Maranhão" },
+  { code: "MT", name: "Mato Grosso" },
+  { code: "MS", name: "Mato Grosso do Sul" },
+  { code: "MG", name: "Minas Gerais" },
+  { code: "PA", name: "Pará" },
+  { code: "PB", name: "Paraíba" },
+  { code: "PR", name: "Paraná" },
+  { code: "PE", name: "Pernambuco" },
+  { code: "PI", name: "Piauí" },
+  { code: "RJ", name: "Rio de Janeiro" },
+  { code: "RN", name: "Rio Grande do Norte" },
+  { code: "RS", name: "Rio Grande do Sul" },
+  { code: "RO", name: "Rondônia" },
+  { code: "RR", name: "Roraima" },
+  { code: "SC", name: "Santa Catarina" },
+  { code: "SP", name: "São Paulo" },
+  { code: "SE", name: "Sergipe" },
+  { code: "TO", name: "Tocantins" },
+];
+
+/**
+ * Every field the user types into. All values are kept as strings so that a
+ * field can be empty while the user is retyping it (Number("") would be 0).
+ * avg_order_value is excluded because it is calculated, not typed.
+ */
+type FormState = Record<Exclude<keyof CustomerInput, "avg_order_value">, string>;
+
+const INITIAL_FORM: FormState = {
+  frequency: "2",
+  monetary: "250",
+  unique_categories: "2",
+  unique_sellers: "2",
+  avg_review_score: "3.5",
+  late_delivery_ratio: "0.3",
+  avg_installments: "0",
+  max_installments: "0",
+  payment_method_count: "0",
+  preferred_payment_type: "credit_card",
+  state: "",
+  latitude: "0",
+  longitude: "0",
+};
+
+/** Monetary value ÷ purchase frequency, rounded to 2 decimals. Null if it can't be calculated. */
+function calculateAvgOrderValue(frequency: string, monetary: string): number | null {
+  if (frequency.trim() === "" || monetary.trim() === "") return null;
+
+  const freq = Number(frequency);
+  const money = Number(monetary);
+
+  if (!Number.isFinite(freq) || !Number.isFinite(money) || freq <= 0) return null;
+
+  return Math.round((money / freq) * 100) / 100;
+}
+
+/* -------------------------------- */
+/* PAGE                             */
+/* -------------------------------- */
+
+function CustomerAnalysis() {
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [result, setResult] = useState<CustomerAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function handleChange(field: keyof CustomerInput, value: string) {
-    const numericFields: Array<keyof CustomerInput> = [
-      "frequency",
-      "monetary",
-      "avg_order_value",
-      "unique_categories",
-      "unique_sellers",
-      "avg_review_score",
-      "late_delivery_ratio",
-      "avg_installments",
-      "max_installments",
-      "payment_method_count",
-      "latitude",
-      "longitude",
-    ];
+  // Recalculated on every render, so it updates in real time as the user types.
+  const avgOrderValue = calculateAvgOrderValue(form.frequency, form.monetary);
 
-    if (numericFields.includes(field)) {
-      setForm((previous) => ({
-        ...previous,
-        [field]: Number(value),
-      }));
-    } else {
-      setForm((previous) => ({
-        ...previous,
-        [field]: value,
-      }));
-    }
+  function handleChange(field: keyof FormState, value: string) {
+    setForm((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
   }
 
   async function handleAnalyze() {
-    setLoading(true);
     setError(null);
 
+    if (avgOrderValue === null) {
+      setError(
+        "Enter a purchase frequency greater than 0 and a monetary value so the average order value can be calculated."
+      );
+      return;
+    }
+
+    if (!form.state) {
+      setError("Please select a state.");
+      return;
+    }
+
+    const toNumber = (field: keyof FormState) =>
+      form[field].trim() === "" ? NaN : Number(form[field]);
+
+    const payload: CustomerInput = {
+      frequency: toNumber("frequency"),
+      monetary: toNumber("monetary"),
+      avg_order_value: avgOrderValue,
+      unique_categories: toNumber("unique_categories"),
+      unique_sellers: toNumber("unique_sellers"),
+      avg_review_score: toNumber("avg_review_score"),
+      late_delivery_ratio: toNumber("late_delivery_ratio"),
+      avg_installments: toNumber("avg_installments"),
+      max_installments: toNumber("max_installments"),
+      payment_method_count: toNumber("payment_method_count"),
+      preferred_payment_type: form.preferred_payment_type,
+      state: form.state,
+      latitude: toNumber("latitude"),
+      longitude: toNumber("longitude"),
+    };
+
+    const hasInvalidNumber = Object.values(payload).some(
+      (value) => typeof value === "number" && Number.isNaN(value)
+    );
+
+    if (hasInvalidNumber) {
+      setError("Please fill in every field with a valid number.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const data = await analyzeCustomer(form);
+      const data = await analyzeCustomer(payload);
       setResult(data);
-    } catch (error) {
-      console.error("Customer analysis failed:", error);
+    } catch (err) {
+      console.error("Customer analysis failed:", err);
       setError("Failed to analyze customer.");
     } finally {
       setLoading(false);
@@ -86,35 +167,10 @@ function CustomerAnalysis() {
       shap: item.shap_value,
     })) ?? [];
 
-    const BRAZILIAN_STATES = [
-        { code: "AC", name: "Acre" },
-        { code: "AL", name: "Alagoas" },
-        { code: "AP", name: "Amapá" },
-        { code: "AM", name: "Amazonas" },
-        { code: "BA", name: "Bahia" },
-        { code: "CE", name: "Ceará" },
-        { code: "DF", name: "Distrito Federal" },
-        { code: "ES", name: "Espírito Santo" },
-        { code: "GO", name: "Goiás" },
-        { code: "MA", name: "Maranhão" },
-        { code: "MT", name: "Mato Grosso" },
-        { code: "MS", name: "Mato Grosso do Sul" },
-        { code: "MG", name: "Minas Gerais" },
-        { code: "PA", name: "Pará" },
-        { code: "PB", name: "Paraíba" },
-        { code: "PR", name: "Paraná" },
-        { code: "PE", name: "Pernambuco" },
-        { code: "PI", name: "Piauí" },
-        { code: "RJ", name: "Rio de Janeiro" },
-        { code: "RN", name: "Rio Grande do Norte" },
-        { code: "RS", name: "Rio Grande do Sul" },
-        { code: "RO", name: "Rondônia" },
-        { code: "RR", name: "Roraima" },
-        { code: "SC", name: "Santa Catarina" },
-        { code: "SP", name: "São Paulo" },
-        { code: "SE", name: "Sergipe" },
-        { code: "TO", name: "Tocantins" },
-    ];
+  // Largest absolute SHAP value, used to scale the bars in the attribution list.
+  const maxAbsShap = result
+    ? Math.max(...result.feature_contributions.map((item) => Math.abs(item.shap_value)), 1e-9)
+    : 1;
 
   return (
     <div className="page">
@@ -140,6 +196,7 @@ function CustomerAnalysis() {
           <div className="customer-form">
             <InputField
               label="Purchase Frequency"
+              step={1}
               value={form.frequency}
               onChange={(value) => handleChange("frequency", value)}
             />
@@ -150,28 +207,56 @@ function CustomerAnalysis() {
             />
             <InputField
               label="Average Order Value"
-              value={form.avg_order_value}
-              onChange={(value) => handleChange("avg_order_value", value)}
+              value={avgOrderValue === null ? "" : avgOrderValue.toFixed(2)}
+              readOnly
             />
             <InputField
               label="Unique Categories"
+              step={1}
               value={form.unique_categories}
               onChange={(value) => handleChange("unique_categories", value)}
             />
             <InputField
               label="Unique Sellers"
+              step={1}
               value={form.unique_sellers}
               onChange={(value) => handleChange("unique_sellers", value)}
             />
             <InputField
               label="Average Review Score"
+              min={0}
+              max={5}
+              step={0.1}
               value={form.avg_review_score}
-              onChange={(value) => handleChange("avg_review_score", value)}
+              onChange={(value) => {
+                const number = Number(value);
+
+                if (number > 5) {
+                  handleChange("avg_review_score", "5");
+                } else if (number < 0) {
+                  handleChange("avg_review_score", "0");
+                } else {
+                  handleChange("avg_review_score", value);
+                }
+              }}
             />
             <InputField
               label="Late Delivery Ratio"
+              min={0}
+              max={1}
+              step={0.01}
               value={form.late_delivery_ratio}
-              onChange={(value) => handleChange("late_delivery_ratio", value)}
+              onChange={(value) => {
+                const number = Number(value);
+
+                if (number > 1) {
+                  handleChange("late_delivery_ratio", "1");
+                } else if (number < 0) {
+                  handleChange("late_delivery_ratio", "0");
+                } else {
+                  handleChange("late_delivery_ratio", value);
+                }
+              }}
             />
             <InputField
               label="Average Installments"
@@ -180,18 +265,23 @@ function CustomerAnalysis() {
             />
             <InputField
               label="Maximum Installments"
+              step={1}
               value={form.max_installments}
               onChange={(value) => handleChange("max_installments", value)}
             />
             <InputField
               label="Payment Method Count"
+              step={1}
               value={form.payment_method_count}
               onChange={(value) => handleChange("payment_method_count", value)}
             />
 
             <div className="form-group">
-              <label className="form-label">Preferred Payment Type</label>
+              <label className="form-label" htmlFor="preferred-payment-type">
+                Preferred Payment Type
+              </label>
               <select
+                id="preferred-payment-type"
                 className="form-select"
                 value={form.preferred_payment_type}
                 onChange={(event) => handleChange("preferred_payment_type", event.target.value)}
@@ -204,29 +294,33 @@ function CustomerAnalysis() {
             </div>
 
             <div className="form-group">
-            <label htmlFor="state">State</label>
-                <select
-                    id="state"
-                    value={form.state}
-                    onChange={(e) => handleChange("state", e.target.value)}
-                >
-                    <option value="">Select a state</option>
-
-                    {BRAZILIAN_STATES.map((state) => (
-                    <option key={state.code} value={state.code}>
-                        {state.name} ({state.code})
-                    </option>
-                    ))}
-                </select>
+              <label className="form-label" htmlFor="state">
+                State
+              </label>
+              <select
+                id="state"
+                className="form-select"
+                value={form.state}
+                onChange={(event) => handleChange("state", event.target.value)}
+              >
+                <option value="">Select a state</option>
+                {BRAZILIAN_STATES.map((state) => (
+                  <option key={state.code} value={state.code}>
+                    {state.name} ({state.code})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <InputField
               label="Latitude"
+              step={0.0001}
               value={form.latitude}
               onChange={(value) => handleChange("latitude", value)}
             />
             <InputField
               label="Longitude"
+              step={0.0001}
               value={form.longitude}
               onChange={(value) => handleChange("longitude", value)}
             />
@@ -240,7 +334,7 @@ function CustomerAnalysis() {
             </button>
           </div>
 
-          {error && <p className="error-message" style={{ marginTop: '16px' }}>{error}</p>}
+          {error && <p className="error-message" style={{ marginTop: "16px" }}>{error}</p>}
         </section>
 
         {/* RESULTS */}
@@ -298,7 +392,7 @@ function CustomerAnalysis() {
                   attributions describe model behaviour and do not establish causation.
                 </div>
 
-                <div className="chart-container" style={{ margin: '20px 0' }}>
+                <div className="chart-container" style={{ margin: "20px 0" }}>
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={attributionData} layout="vertical" margin={{ left: 40, right: 30 }}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -322,16 +416,20 @@ function CustomerAnalysis() {
                     <div className="attribution-row" key={item.feature}>
                       <span className="attribution-feature">{formatFeatureName(item.feature)}</span>
                       <div className="attribution-bar-container">
-                        <div 
-                          className="attribution-bar" 
-                          style={{ 
-                            width: '100%', 
-                            background: item.shap_value > 0 ? '#dc2626' : '#16a34a',
-                            opacity: Math.min(Math.abs(item.shap_value) * 2, 1) 
+                        <div
+                          className="attribution-bar"
+                          style={{
+                            // Width is proportional to this feature's share of the largest SHAP value
+                            width: `${Math.max((Math.abs(item.shap_value) / maxAbsShap) * 100, 2)}%`,
+                            background: item.shap_value > 0 ? "#dc2626" : "#16a34a",
                           }}
                         ></div>
                       </div>
-                      <span className={`attribution-value ${item.shap_value > 0 ? "attribution-positive" : "attribution-negative"}`}>
+                      <span
+                        className={`attribution-value ${
+                          item.shap_value > 0 ? "attribution-positive" : "attribution-negative"
+                        }`}
+                      >
                         {item.shap_value > 0 ? "↑ Increases risk" : "↓ Decreases risk"}
                       </span>
                     </div>
@@ -385,11 +483,25 @@ function CustomerAnalysis() {
 
 interface InputFieldProps {
   label: string;
-  value: number;
-  onChange: (value: string) => void;
+  value: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+  hint?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
-function InputField({ label, value, onChange }: InputFieldProps) {
+function InputField({
+  label,
+  value,
+  onChange,
+  readOnly = false,
+  hint,
+  min,
+  max,
+  step = 0.1,
+}: InputFieldProps) {
   return (
     <div className="form-group">
       <label className="form-label">{label}</label>
@@ -397,9 +509,25 @@ function InputField({ label, value, onChange }: InputFieldProps) {
         className="form-input"
         type="number"
         value={value}
-        step="any"
-        onChange={(event) => onChange(event.target.value)}
+        min={min}
+        max={max}
+        step={step}
+        readOnly={readOnly}
+        onChange={(event) => onChange?.(event.target.value)}
+        style={readOnly ? { backgroundColor: "#f3f4f6", cursor: "not-allowed" } : undefined}
       />
+      {hint && (
+        <small
+          style={{
+            display: "block",
+            marginTop: "4px",
+            color: "#6b7280",
+            fontSize: "12px",
+          }}
+        >
+          {hint}
+        </small>
+      )}
     </div>
   );
 }
@@ -410,10 +538,14 @@ function InputField({ label, value, onChange }: InputFieldProps) {
 
 function getRiskClass(risk: string) {
   switch (risk.toLowerCase()) {
-    case "high": return "high";
-    case "medium": return "medium";
-    case "low": return "low";
-    default: return "";
+    case "high":
+      return "high";
+    case "medium":
+      return "medium";
+    case "low":
+      return "low";
+    default:
+      return "";
   }
 }
 
