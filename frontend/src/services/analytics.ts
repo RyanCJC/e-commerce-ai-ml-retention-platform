@@ -12,9 +12,15 @@ export interface RiskDistribution {
   High: number;
 }
 
+export interface ChurnProbabilityBucket {
+  probability_range: string;
+  customer_count: number;
+}
+
 export interface AnalyticsResponse {
   overview: AnalyticsOverview;
   risk_distribution: RiskDistribution;
+  churn_probability_distribution: ChurnProbabilityBucket[];
   risk_segment_summary: Record<string, any>;
   customer_metrics_by_risk: Record<string, any>;
   top_risk_factors: any[];

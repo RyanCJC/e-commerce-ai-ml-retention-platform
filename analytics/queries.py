@@ -129,6 +129,45 @@ def get_risk_distribution():
     return distribution
 
 
+def get_churn_probability_distribution():
+
+    probabilities = []
+    page_size = 1000
+    offset = 0
+    while True:
+        page = (
+            supabase
+            .table("churn_analyses")
+            .select("churn_probability")
+            .range(offset, offset + page_size - 1)
+            .execute()
+        ).data
+        probabilities.extend(page)
+        if len(page) < page_size:
+            break
+        offset += page_size
+
+    distribution = [
+        {
+            "probability_range": f"{start}-{start + 10}%",
+            "customer_count": 0,
+        }
+        for start in range(0, 100, 10)
+    ]
+
+    for row in probabilities:
+        probability = float(row["churn_probability"])
+        if not 0 <= probability <= 1:
+            raise ValueError(
+                f"Churn probability must be between 0 and 1, received {probability}"
+            )
+
+        bucket_index = min(int(probability * 10), 9)
+        distribution[bucket_index]["customer_count"] += 1
+
+    return distribution
+
+
 def get_average_churn_probability():
 
     result = (

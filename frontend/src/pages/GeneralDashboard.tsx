@@ -11,6 +11,8 @@ import {
   Legend,
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -127,6 +129,22 @@ function Dashboard() {
             <div className="risk-item-label">High Risk</div>
             <div className="risk-item-value risk-high">{analytics.risk_distribution.High}</div>
           </div>
+        </div>
+        <div className="interpretation-note">
+          <strong>Risk Level</strong>
+          <div>
+            <strong>Low:</strong> Churn probability &lt; 40%
+          </div>
+          <div>
+            <strong>Medium:</strong> Churn probability 40%–69%
+          </div>
+          <div>
+            <strong>High:</strong> Churn probability ≥ 70%
+          </div>
+          <em>
+            Risk thresholds are business-defined and can be adjusted based on validation results and
+            retention strategy.
+          </em>
         </div>
       </div>
 
@@ -258,6 +276,33 @@ function Dashboard() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* CHURN PROBABILITY POPULATION */}
+      <section className="card" style={{ marginTop: "24px" }}>
+        <h2 className="card-title">Customer Population by Churn Probability</h2>
+        <p className="card-description">
+          Number of analyzed customers in each predicted churn-probability range.
+        </p>
+
+        <div style={{ width: "100%", height: 350 }}>
+          <ResponsiveContainer>
+            <AreaChart data={analytics.churn_probability_distribution}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="probability_range" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Area
+                type="monotone"
+                dataKey="customer_count"
+                name="Customers"
+                stroke="#6366f1"
+                fill="#6366f1"
+                fillOpacity={0.2}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </section>
     </div>

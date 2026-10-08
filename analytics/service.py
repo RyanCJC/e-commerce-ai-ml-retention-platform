@@ -3,6 +3,7 @@ from analytics.queries import (
     get_churn_rate,
     get_risk_distribution,
     get_average_churn_probability,
+    get_churn_probability_distribution,
     get_risk_segment_summary,
     get_customer_metrics_by_risk,
     get_top_risk_factors,
@@ -23,6 +24,7 @@ def get_dashboard_analytics():
         },
 
         "risk_distribution": get_risk_distribution(),
+        "churn_probability_distribution": get_churn_probability_distribution(),
         "risk_segment_summary": get_risk_segment_summary(),
         "customer_metrics_by_risk": get_customer_metrics_by_risk(),
         "top_risk_factors": get_top_risk_factors(),

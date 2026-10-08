@@ -8,10 +8,16 @@ class AnalyticsOverview(BaseModel):
     average_churn_probability: float
 
 
+class ChurnProbabilityBucket(BaseModel):
+    probability_range: str
+    customer_count: int
+
+
 class AnalyticsResponse(BaseModel):
 
     overview: AnalyticsOverview
     risk_distribution: dict
+    churn_probability_distribution: list[ChurnProbabilityBucket]
     risk_segment_summary: dict
     customer_metrics_by_risk: dict
     top_risk_factors: list
