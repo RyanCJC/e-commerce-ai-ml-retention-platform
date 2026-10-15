@@ -92,17 +92,10 @@ function Dashboard() {
       </div>
 
       {/* OVERVIEW CARDS */}
-      <div className="overview-grid">
+      <div className="overview-grid overview-metrics-grid">
         <div className="metric-card">
           <div className="metric-label">Total Customers</div>
           <div className="metric-value">{analytics.overview.total_customers}</div>
-        </div>
-
-        <div className="metric-card">
-          <div className="metric-label">Predicted Churn Rate</div>
-          <div className="metric-value">
-            {(analytics.overview.predicted_churn_rate * 100).toFixed(1)}%
-          </div>
         </div>
 
         <div className="metric-card">
