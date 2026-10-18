@@ -107,7 +107,7 @@ function Dashboard() {
       </div>
 
       {/* RISK SUMMARY */}
-      <div className="card" style={{ marginBottom: "24px" }}>
+      <div className="card card-stacked">
         <h2 className="card-title">Risk Level Population</h2>
         <div className="risk-summary">
           <div className="risk-item">
@@ -147,7 +147,7 @@ function Dashboard() {
           <h2 className="card-title">Risk Distribution</h2>
           <p className="card-description">Distribution of customers by predicted churn-risk level.</p>
 
-          <div style={{ width: "100%", height: 300 }}>
+          <div className="chart-container">
             <ResponsiveContainer>
               <PieChart>
                 <Pie data={riskData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
@@ -162,7 +162,7 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* RISK SEGMENT TABLE */}
+      {/* RISK SEGMENT TABLE */}
         <section className="card">
           <h2 className="card-title">Risk Segment Summary</h2>
           <p className="card-description">Average customer characteristics across each risk segment.</p>
@@ -195,11 +195,11 @@ function Dashboard() {
       </div>
 
       {/* SEGMENT METRICS */}
-      <section className="card" style={{ marginBottom: "24px" }}>
+      <section className="card card-stacked">
         <h2 className="card-title">Risk Segment Metrics</h2>
         <p className="card-description">Comparison of average customer behaviour across risk segments.</p>
 
-        <div style={{ width: "100%", height: 350 }}>
+        <div className="chart-container">
           <ResponsiveContainer>
             <BarChart data={riskSummaryData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -215,7 +215,7 @@ function Dashboard() {
       </section>
 
       {/* MODEL ATTRIBUTION */}
-      <section className="card" style={{ marginBottom: "24px" }}>
+      <section className="card card-stacked">
         <h2 className="card-title">Top Model-Attributed Features</h2>
         <p className="card-description">
           Features with the greatest aggregate SHAP attribution across analyzed customers.
@@ -226,7 +226,7 @@ function Dashboard() {
           influenced the model's prediction. It does not establish that the feature caused customer churn.
         </div>
 
-        <div style={{ width: "100%", height: 400, marginTop: "20px" }}>
+        <div className="chart-container">
           <ResponsiveContainer>
             <BarChart data={topRiskFactors} layout="vertical" margin={{ left: 40, right: 30 }}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -240,28 +240,28 @@ function Dashboard() {
       </section>
 
       {/* ATTRIBUTION BY RISK */}
-      <section className="card">
+      <section className="card card-stacked">
         <h2 className="card-title">Model Attribution by Risk Level</h2>
         <p className="card-description">Features with the strongest model attribution within each risk segment.</p>
 
-        <div className="overview-grid" style={{ marginTop: "20px" }}>
+        <div className="overview-grid">
           {["Low", "Medium", "High"].map((risk) => {
             const factors = analytics.risk_factors_by_risk_level[risk] ?? [];
 
             return (
               <div className="metric-card" key={risk}>
-                <h3 style={{ margin: "0 0 16px", fontSize: "16px" }}>{risk} Risk</h3>
+                 <h3 className="section-title-sm">{risk} Risk</h3>
 
                 <div className="attribution-list">
                   {factors.length === 0 ? (
-                    <p style={{ fontSize: "14px", color: "#6b7280" }}>No data available.</p>
+                    <p className="text-caption">No data available.</p>
                   ) : (
                     factors.map((factor) => (
-                      <div className="attribution-row" key={factor.feature} style={{ gridTemplateColumns: "1fr auto" }}>
+                       <div className="attribution-row compact" key={factor.feature}>
                         <span className="attribution-feature">{formatFeatureName(factor.feature)}</span>
-                        <span className="attribution-value" style={{ color: "#111827" }}>
-                          {factor.total_abs_shap.toFixed(3)}
-                        </span>
+                         <span className="attribution-value">
+                           {factor.total_abs_shap.toFixed(3)}
+                         </span>
                       </div>
                     ))
                   )}
@@ -273,13 +273,13 @@ function Dashboard() {
       </section>
 
       {/* CHURN PROBABILITY POPULATION */}
-      <section className="card" style={{ marginTop: "24px" }}>
+      <section className="card">
         <h2 className="card-title">Customer Population by Churn Probability</h2>
         <p className="card-description">
           Number of analyzed customers in each predicted churn-probability range.
         </p>
 
-        <div style={{ width: "100%", height: 350 }}>
+        <div className="chart-container">
           <ResponsiveContainer>
             <AreaChart data={analytics.churn_probability_distribution}>
               <CartesianGrid strokeDasharray="3 3" />

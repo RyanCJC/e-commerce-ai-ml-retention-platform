@@ -438,7 +438,7 @@ function CustomerAnalysis() {
           </details>
 
 
-          {error && <p className="error-message" style={{ marginTop: "16px" }}>{error}</p>}
+          {error && <p className="error-message">{error}</p>}
         </section>
 
         {/* RESULTS */}
@@ -496,7 +496,7 @@ function CustomerAnalysis() {
                   attributions describe model behaviour and do not establish causation.
                 </div>
 
-                <div className="chart-container" style={{ margin: "20px 0" }}>
+                <div className="chart-container">
                   <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={attributionData} layout="vertical" margin={{ left: 40, right: 30 }}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -618,20 +618,8 @@ function InputField({
         step={step}
         readOnly={readOnly}
         onChange={(event) => onChange?.(event.target.value)}
-        style={readOnly ? { backgroundColor: "#f3f4f6", cursor: "not-allowed" } : undefined}
       />
-      {hint && (
-        <small
-          style={{
-            display: "block",
-            marginTop: "4px",
-            color: "#6b7280",
-            fontSize: "12px",
-          }}
-        >
-          {hint}
-        </small>
-      )}
+      {hint && <small className="form-hint">{hint}</small>}
     </div>
   );
 }

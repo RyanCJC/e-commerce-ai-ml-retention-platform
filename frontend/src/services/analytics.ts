@@ -17,14 +17,28 @@ export interface ChurnProbabilityBucket {
   customer_count: number;
 }
 
+export interface RiskSegmentSummary {
+  customer_count: number;
+  avg_churn_probability: number;
+  avg_frequency: number;
+  avg_monetary: number;
+  avg_review_score: number;
+  avg_late_delivery_ratio: number;
+}
+
+export interface RiskFactor {
+  feature: string;
+  total_abs_shap: number;
+}
+
 export interface AnalyticsResponse {
   overview: AnalyticsOverview;
   risk_distribution: RiskDistribution;
   churn_probability_distribution: ChurnProbabilityBucket[];
-  risk_segment_summary: Record<string, any>;
-  customer_metrics_by_risk: Record<string, any>;
-  top_risk_factors: any[];
-  risk_factors_by_risk_level: Record<string, any[]>;
+  risk_segment_summary: Record<string, RiskSegmentSummary>;
+  customer_metrics_by_risk: Record<string, RiskSegmentSummary>;
+  top_risk_factors: RiskFactor[];
+  risk_factors_by_risk_level: Record<string, RiskFactor[]>;
 }
 
 export async function getAnalytics(): Promise<AnalyticsResponse> {

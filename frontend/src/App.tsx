@@ -6,15 +6,28 @@ function App() {
   const [page, setPage] = useState<"dashboard" | "customer">("dashboard");
 
   return (
-    <div>
-      <nav>
-        <button onClick={() => setPage("dashboard")}>
-          Dashboard
-        </button>
-
-        <button onClick={() => setPage("customer")}>
-          Customer Analysis
-        </button>
+    <div className="app">
+      <nav className="navbar">
+        <div className="navbar-inner">
+          <div className="navbar-brand">
+            <span className="dot" />
+            ChurnFlow
+          </div>
+          <div className="navbar-links">
+            <button
+              className={`nav-button ${page === "dashboard" ? "active" : ""}`}
+              onClick={() => setPage("dashboard")}
+            >
+              Dashboard
+            </button>
+            <button
+              className={`nav-button ${page === "customer" ? "active" : ""}`}
+              onClick={() => setPage("customer")}
+            >
+              Customer Analysis
+            </button>
+          </div>
+        </div>
       </nav>
 
       {/* Mounted only while visible, so it refetches fresh analytics each time
@@ -22,7 +35,7 @@ function App() {
       {page === "dashboard" && <Dashboard />}
 
       {/* Always mounted, just hidden, so the form and results survive tab switches. */}
-      <div style={{ display: page === "customer" ? "block" : "none" }}>
+      <div className={page === "customer" ? "customer-view" : "is-hidden"}>
         <CustomerAnalysis />
       </div>
     </div>
